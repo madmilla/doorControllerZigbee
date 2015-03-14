@@ -1,0 +1,359 @@
+###############################################################################
+#
+# IAR C/C++ Compiler V6.20.1.931/W32 for MSP430           14/Mar/2015  23:43:44
+# Copyright 1996-2014 IAR Systems AB.
+# Standalone license - IAR Embedded Workbench for Texas Instruments MSP430, 8K KickStart Edition 6.20
+#
+#    __rt_version  =  3
+#    __double_size =  32
+#    __reg_r4      =  free
+#    __reg_r5      =  free
+#    __pic         =  no
+#    __core        =  430
+#    Source file   =  C:\Users\Madmilla\Desktop\eZ430-RF2480\common\mt\mt.c
+#    Command line  =  
+#        -f C:\Users\Madmilla\Desktop\eZ430-RF2480\ZASA\IAR\..\Source\ZASA.cfg
+#        (-DZACCEL_BUF_LEN=128 -DHOST_MT_BAUD=9600 -DHOST_MT_RX_OLD=1
+#        "-DHOST_MT_RX_FULL=(ZACCEL_BUF_LEN-1)" -DZACCEL_NV_CHANLIST=0x00008000
+#        -DZACCEL_NV_PANID=0x0EEE)
+#        C:\Users\Madmilla\Desktop\eZ430-RF2480\common\mt\mt.c -D COORDINATOR
+#        -D HOST_MT -D APP_BLINK_LEDS -lC
+#        C:\Users\Madmilla\Desktop\eZ430-RF2480\ZASA\IAR\Coordinator\List\
+#        --remarks --diag_suppress Pe068 -o
+#        C:\Users\Madmilla\Desktop\eZ430-RF2480\ZASA\IAR\Coordinator\Obj\
+#        --debug -D__MSP430F2274__ --warnings_are_errors -e --double=32 --clib
+#        -I C:\Users\Madmilla\Desktop\eZ430-RF2480\ZASA\IAR\ -I
+#        C:\Users\Madmilla\Desktop\eZ430-RF2480\ZASA\IAR\..\Source\ -I
+#        C:\Users\Madmilla\Desktop\eZ430-RF2480\ZASA\IAR\..\..\common\zaccel\
+#        -I C:\Users\Madmilla\Desktop\eZ430-RF2480\ZASA\IAR\..\..\common\mt\ -I
+#        C:\Users\Madmilla\Desktop\eZ430-RF2480\ZASA\IAR\..\..\target\include\
+#        -I
+#        C:\Users\Madmilla\Desktop\eZ430-RF2480\ZASA\IAR\..\..\target\cc2480\
+#        --reduce_stack_usage -Ohz --require_prototypes
+#    List file     =  
+#        C:\Users\Madmilla\Desktop\eZ430-RF2480\ZASA\IAR\Coordinator\List\mt.lst
+#    Object file   =  
+#        C:\Users\Madmilla\Desktop\eZ430-RF2480\ZASA\IAR\Coordinator\Obj\mt.r43
+#
+###############################################################################
+
+C:\Users\Madmilla\Desktop\eZ430-RF2480\common\mt\mt.c
+      1          /**************************************************************************************************
+      2              Filename:       mt.c
+      3              Revised:        $Date: 2008-04-03 18:32:40 -0700 (Thu, 03 Apr 2008) $
+      4              Revision:       $Revision: 16728 $
+      5          
+      6              Description: This file defines the main functionality of the interface to MT via Z-Accel.
+      7          
+      8              Copyright 2006-2007 Texas Instruments Incorporated. All rights reserved.
+      9          
+     10              IMPORTANT: Your use of this Software is limited to those specific rights
+     11              granted under the terms of a software license agreement between the user
+     12              who downloaded the software, his/her employer (which must be your employer)
+     13              and Texas Instruments Incorporated (the "License").  You may not use this
+     14              Software unless you agree to abide by the terms of the License. The License
+     15              limits your use, and you acknowledge, that the Software may not be modified,
+     16              copied or distributed unless embedded on a Texas Instruments microcontroller
+     17              or used solely and exclusively in conjunction with a Texas Instruments radio
+     18              frequency transceiver, which is integrated into your product.  Other than for
+     19              the foregoing purpose, you may not use, reproduce, copy, prepare derivative
+     20              works of, modify, distribute, perform, display or sell this Software and/or
+     21              its documentation for any purpose.
+     22          
+     23              YOU FURTHER ACKNOWLEDGE AND AGREE THAT THE SOFTWARE AND DOCUMENTATION ARE
+     24              PROVIDED “AS IS” WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, 
+     25              INCLUDING WITHOUT LIMITATION, ANY WARRANTY OF MERCHANTABILITY, TITLE, 
+     26              NON-INFRINGEMENT AND FITNESS FOR A PARTICULAR PURPOSE. IN NO EVENT SHALL
+     27              TEXAS INSTRUMENTS OR ITS LICENSORS BE LIABLE OR OBLIGATED UNDER CONTRACT,
+     28              NEGLIGENCE, STRICT LIABILITY, CONTRIBUTION, BREACH OF WARRANTY, OR OTHER
+     29              LEGAL EQUITABLE THEORY ANY DIRECT OR INDIRECT DAMAGES OR EXPENSES
+     30              INCLUDING BUT NOT LIMITED TO ANY INCIDENTAL, SPECIAL, INDIRECT, PUNITIVE
+     31              OR CONSEQUENTIAL DAMAGES, LOST PROFITS OR LOST DATA, COST OF PROCUREMENT
+     32              OF SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
+     33              (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF), OR OTHER SIMILAR COSTS.
+     34          
+     35              Should you have any questions regarding your right to use this Software,
+     36              contact Texas Instruments Incorporated at www.TI.com.
+     37          **************************************************************************************************/
+     38          
+     39          /* ------------------------------------------------------------------------------------------------
+     40           *                                          Includes
+     41           * ------------------------------------------------------------------------------------------------
+     42           */
+     43          
+     44          #include "hal_board.h"
+     45          #include "mt.h"
+     46          
+     47          #ifdef HOST_MT
+     48          /* ------------------------------------------------------------------------------------------------
+     49           *                                           Macros
+     50           * ------------------------------------------------------------------------------------------------
+     51           */
+     52          
+     53          /* ------------------------------------------------------------------------------------------------
+     54           *                                           Constants
+     55           * ------------------------------------------------------------------------------------------------
+     56           */
+     57          
+     58          /* ------------------------------------------------------------------------------------------------
+     59           *                                           Local Variables
+     60           * ------------------------------------------------------------------------------------------------
+     61           */
+     62          
+     63          /* ------------------------------------------------------------------------------------------------
+     64           *                                           Global Variables
+     65           * ------------------------------------------------------------------------------------------------
+     66           */
+     67          
+     68          /* ------------------------------------------------------------------------------------------------
+     69           *                                           Local Functions
+     70           * ------------------------------------------------------------------------------------------------
+     71           */
+     72          
+     73          /**************************************************************************************************
+     74           * @fn          mtInit
+     75           *
+     76           * @brief       This function initializes the host MT environment.
+     77           *
+     78           * input parameters
+     79           *
+     80           * None.
+     81           *
+     82           * output parameters
+     83           *
+     84           * None.
+     85           *
+     86           * @return      None.
+     87           **************************************************************************************************
+     88           */
+
+   \                                 In  segment CODE, align 2
+     89          void mtInit(void)
+   \                     mtInit:
+     90          {
+     91          }
+   \   000000   3041         RET
+     92          
+     93          /**************************************************************************************************
+     94           * @fn          mtRx
+     95           *
+     96           * @brief       This function translates and then transfers a UART MT packet as an RPC packet.
+     97           *
+     98           * input parameters
+     99           *
+    100           * None.
+    101           *
+    102           * output parameters
+    103           *
+    104           * None.
+    105           *
+    106           * @return      TRUE if the Rx data was processed; FALSE otherwise.
+    107           **************************************************************************************************
+    108           */
+
+   \                                 In  segment CODE, align 2
+    109          uint8 mtRx(void)
+   \                     mtRx:
+    110          {
+   \   000000   0A12         PUSH.W  R10
+   \   000002   0B12         PUSH.W  R11
+   \   000004   0812         PUSH.W  R8
+   \   000006   0912         PUSH.W  R9
+    111            uint8 *pBuf = zaccelMsgBuf;
+    112            uint8 len = halUARTRead(HAL_PORT_MT, pBuf, ZACCEL_BUF_LEN-1);
+   \   000008   7E407F00     MOV.B   #0x7f, R14
+   \   00000C   3D40....     MOV.W   #zaccelMsgBuf, R13
+   \   000010   4C43         MOV.B   #0x0, R12
+   \   000012   B012....     CALL    #halUARTRead
+   \   000016   494C         MOV.B   R12, R9
+    113            uint8 idx = 0;
+   \   000018   4A43         MOV.B   #0x0, R10
+   \   00001A   1E3C         JMP     ??mtRx_2
+    114          
+    115            do {
+    116              while (len)
+    117              {
+    118                if (pBuf[idx++] == SOP_VALUE)
+    119                {
+    120                  break;
+    121                }
+    122                len--;
+    123              }
+    124          
+    125              if (len > MT_RPC_FRAME_HDR_SZ)
+   \                     ??mtRx_0:
+   \   00001C   6992         CMP.B   #0x4, R9
+   \   00001E   1528         JNC     ??mtRx_1
+    126              {
+    127                uint8 cnt = pBuf[idx] + MT_RPC_FRAME_HDR_SZ;
+   \   000020   484A         MOV.B   R10, R8
+   \   000022   5B48....     MOV.B   zaccelMsgBuf(R8), R11
+   \   000026   7B500300     ADD.B   #0x3, R11
+    128                if ((calcFCS((pBuf+idx), cnt)) == pBuf[idx+cnt])
+   \   00002A   4D4B         MOV.B   R11, R13
+   \   00002C   0C48         MOV.W   R8, R12
+   \   00002E   3C50....     ADD.W   #zaccelMsgBuf, R12
+   \   000032   B012....     CALL    #calcFCS
+   \   000036   0F48         MOV.W   R8, R15
+   \   000038   0F5B         ADD.W   R11, R15
+   \   00003A   5C9F....     CMP.B   zaccelMsgBuf(R15), R12
+   \   00003E   0520         JNE     ??mtRx_1
+    129                {
+    130                  zaccelRPC(pBuf+idx);
+   \   000040   3850....     ADD.W   #zaccelMsgBuf, R8
+   \   000044   0C48         MOV.W   R8, R12
+   \   000046   B012....     CALL    #zaccelRPC
+    131                }
+    132              }
+   \                     ??mtRx_1:
+   \   00004A   4F4A         MOV.B   R10, R15
+   \   00004C   5A53         ADD.B   #0x1, R10
+   \   00004E   FF90FE00.... CMP.B   #0xfe, zaccelMsgBuf(R15)
+   \   000054   E327         JEQ     ??mtRx_0
+   \   000056   7953         ADD.B   #0xff, R9
+   \                     ??mtRx_2:
+   \   000058   4993         CMP.B   #0x0, R9
+   \   00005A   F723         JNE     ??mtRx_1
+    133            } while (len);
+    134          
+    135            return TRUE;
+   \   00005C   5C43         MOV.B   #0x1, R12
+   \   00005E   3040....     BR      #?Epilogue4
+    136          }
+    137          
+    138          /**************************************************************************************************
+    139           * @fn          mtTx
+    140           *
+    141           * @brief       This function translates and then transfers an RPC packet as a UART MT packet.
+    142           *
+    143           * input parameters
+    144           *
+    145           * @param       pBuf - Pointer to the buffer to be used.
+    146           *
+    147           * output parameters
+    148           *
+    149           * None.
+    150           *
+    151           * @return      None.
+    152           **************************************************************************************************
+    153           */
+
+   \                                 In  segment CODE, align 2
+    154          void mtTx(uint8 *pBuf)
+   \                     mtTx:
+    155          {
+   \   000000   0A12         PUSH.W  R10
+   \   000002   2183         SUB.W   #0x2, SP
+   \   000004   0A4C         MOV.W   R12, R10
+    156            uint8 tmp = SOP_VALUE;
+   \   000006   F140FE000000 MOV.B   #0xfe, 0(SP)
+    157          
+    158            halUARTWrite(HAL_PORT_MT, &tmp, 1);
+   \   00000C   B012....     CALL    #?Subroutine0
+    159            tmp = *pBuf + MT_RPC_FRAME_HDR_SZ;
+   \                     ??CrossCallReturnLabel_1:
+   \   000010   6E4A         MOV.B   @R10, R14
+   \   000012   7E500300     ADD.B   #0x3, R14
+   \   000016   C14E0000     MOV.B   R14, 0(SP)
+    160            halUARTWrite(HAL_PORT_MT, pBuf, tmp);
+   \   00001A   0D4A         MOV.W   R10, R13
+   \   00001C   4C43         MOV.B   #0x0, R12
+   \   00001E   B012....     CALL    #halUARTWrite
+    161            tmp = calcFCS(pBuf, tmp);
+   \   000022   6D41         MOV.B   @SP, R13
+   \   000024   0C4A         MOV.W   R10, R12
+   \   000026   B012....     CALL    #calcFCS
+   \   00002A   C14C0000     MOV.B   R12, 0(SP)
+    162            halUARTWrite(HAL_PORT_MT, &tmp, 1);
+   \   00002E   B012....     CALL    #?Subroutine0
+    163          }
+   \                     ??CrossCallReturnLabel_0:
+   \   000032   2153         ADD.W   #0x2, SP
+   \   000034   3A41         POP.W   R10
+   \   000036   3041         RET
+
+   \                                 In  segment CODE, align 2
+   \                     ?Subroutine0:
+   \   000000   5E43         MOV.B   #0x1, R14
+   \   000002   0D41         MOV.W   SP, R13
+   \   000004   2D53         ADD.W   #0x2, R13
+   \   000006   4C43         MOV.B   #0x0, R12
+   \   000008   3040....     BR      #halUARTWrite
+    164          
+    165          /**************************************************************************************************
+    166           * @fn          calcFCS
+    167           *
+    168           * @brief       This function calculates the FCS checksum for the MT protocol serial message to the
+    169           *              Z-Tool PC GUI.
+    170           *
+    171           * input parameters
+    172           *
+    173           * @param       pBuf - Pointer to the end of a buffer to calculate the FCS.
+    174           * @param       len - Length of the pBuf.
+    175           *
+    176           * output parameters
+    177           *
+    178           * None.
+    179           *
+    180           * @return      The calculated FCS.
+    181           **************************************************************************************************
+    182           */
+
+   \                                 In  segment CODE, align 2
+    183          uint8 calcFCS(uint8 *pBuf, uint8 len)
+   \                     calcFCS:
+    184          {
+    185            uint8 rtrn = 0;
+   \   000000   4F43         MOV.B   #0x0, R15
+   \   000002   013C         JMP     ??calcFCS_1
+    186          
+    187            while (len--)
+    188            {
+    189              rtrn ^= *pBuf++;
+   \                     ??calcFCS_0:
+   \   000004   7FEC         XOR.B   @R12+, R15
+    190            }
+   \                     ??calcFCS_1:
+   \   000006   4E4D         MOV.B   R13, R14
+   \   000008   7D53         ADD.B   #0xff, R13
+   \   00000A   4E93         CMP.B   #0x0, R14
+   \   00000C   FB23         JNE     ??calcFCS_0
+    191          
+    192            return rtrn;
+   \   00000E   4C4F         MOV.B   R15, R12
+   \   000010   3041         RET
+    193          }
+    194          #endif
+
+   Maximum stack usage in bytes:
+
+   CSTACK Function
+   ------ --------
+      2   calcFCS
+      2   mtInit
+     10   mtRx
+       10   -> calcFCS
+       10   -> halUARTRead
+       10   -> zaccelRPC
+      6   mtTx
+        6   -> calcFCS
+        6   -> halUARTWrite
+
+
+   Segment part sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+      12  ?Subroutine0
+      18  calcFCS
+       2  mtInit
+      98  mtRx
+      56  mtTx
+
+ 
+ 186 bytes in segment CODE
+ 
+ 186 bytes of CODE memory
+
+Errors: none
+Warnings: none
